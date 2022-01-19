@@ -61,6 +61,12 @@ dbus-java
 sd-bus for the systemd software suite.
 ```
 
+## DBUS common operations:
+Ex-1: Sending a Signal - Receiving a Signal
+Ex-2: Calling a Method -Exposing a Method to be called -
+
+
+
 
 ## Common Code :
 A lot of the code is common no matter what you want to do on the Bus. 
