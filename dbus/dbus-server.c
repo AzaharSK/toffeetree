@@ -16,7 +16,10 @@ int main()
 	DBusConnection* conn;
 	int ret;
 
+	//// initialise the errors ////////////////////////////////////////////////////
 	dbus_error_init(&dbus_error);
+	
+	//// connect to the bus //////////////////////////////////////////////////////
 	conn = dbus_bus_get(DBUS_BUS_SESSION, &dbus_error);
 
 	if (dbus_error_is_set (&dbus_error)) { 
@@ -26,7 +29,7 @@ int main()
  	
 	if (!conn) { exit (1); }
 
-
+        //// Get a well known name //////////////////////////////////////////////////
 	const char *const SERVER_BUS_NAME = "in.softprayog.add_server";
 	ret = dbus_bus_request_name (conn, SERVER_BUS_NAME, DBUS_NAME_FLAG_DO_NOT_QUEUE, &dbus_error);
 	if (dbus_error_is_set (&dbus_error)){
@@ -56,13 +59,14 @@ int main()
          		continue;
       		}
 
+               //// Exposing a Method to be called //////////////////////////////////////////////////
 
 		const char *const INTERFACE_NAME = "in.softprayog.dbus_example";
 		const char *const METHOD_NAME = "add_numbers";
 
 		// check this is a method call for the right interface and method
 		if (dbus_message_is_method_call(msg, INTERFACE_NAME, METHOD_NAME))
-         		reply_to_method_call(msg, conn);
+         		reply_to_method_call(msg, conn);   //// Prepare reply to the method  /////////////////
 
 		// free the message
       		dbus_message_unref(msg);
@@ -124,3 +128,15 @@ void reply_to_method_call(DBusMessage* msg, DBusConnection* conn)
 	/// free the reply
    	dbus_message_unref(reply);
 }
+
+/*********************************************************************************
+
+toffeetree/dbus$ ./dbus-server 
+
+Method called with hello
+
+Method called with hey baby
+
+Method called with ok
+
+****************************************************************************/
