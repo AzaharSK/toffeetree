@@ -134,6 +134,7 @@ construct a reply message from the original and populate its parameters with the
 Finally you have to send and free the reply.
 
 ```
+	// loop, testing for new messages : Handle request from clients
 
 while(true) {
 
