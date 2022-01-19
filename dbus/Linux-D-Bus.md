@@ -158,6 +158,12 @@ const char *const METHOD_NAME = "add_numbers";
    }
    
    ```
+After you have finished with the bus you should close the connection. Note that this is a shared connection to the bus so you probably only want to do this just before the application terminates.
+
+```
+   dbus_connection_close(conn);
+  
+```
 
 REF:
 http://www.matthew.ath.cx/misc/dbus                             
