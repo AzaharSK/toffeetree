@@ -68,7 +68,7 @@ int main()
       		dbus_message_unref(msg);
 	}
 
-
+	dbus_connection_close(conn);
 
 	return 0;
 }
