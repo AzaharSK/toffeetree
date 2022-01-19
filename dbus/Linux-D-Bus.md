@@ -119,8 +119,14 @@ conn = dbus_bus_get (DBUS_BUS_SESSION, &dbus_error);
     }
 
 ```
+After you have finished with the bus you should close the connection. Note that this is a shared connection to the bus so you probably only want to do this just before the application terminates at main() END.
 
-//Exposing a Method to be called
+```
+   dbus_connection_close(conn);
+  
+```
+
+## Exposing a Method to be called
 
 To expose a method which may be called by other DBUS applications you have to listen for messages as above,
 then when you get a method call corresponding to the method you exposed you parse out the parameters, 
@@ -129,40 +135,91 @@ Finally you have to send and free the reply.
 
 ```
 
-const char *const INTERFACE_NAME = "in.softprayog.dbus_example";
-const char *const METHOD_NAME = "add_numbers";
+while(true) {
 
-// loop, testing for new messages : Handle request from clients
+		// non blocking read of the next available message
+		dbus_connection_read_write(conn, 0);
+		DBusMessage *msg = dbus_connection_pop_message(conn);
 
-   while (true) {
- 
-      // non blocking read of the next available message
-      
-      dbus_connection_read_write(conn, 0);
-      DBusMessage *msg = dbus_connection_pop_message(conn);
 
-      // loop again if we haven't got a message
-      
-      if (NULL == msg) { 
-         sleep(1); 
-         continue; 
-      }
+		// Loop again
+		if (NULL == msg) {
+        		sleep(1);
+         		continue;
+      		}
 
-      // check this is a method call for the right interface and method
-      
-      if (dbus_message_is_method_call(msg, INTERFACE_NAME, METHOD_NAME))
-         reply_to_method_call(msg, conn);
+               //// Exposing a Method to be called //////////////////////////////////////////////////
 
-      // free the message
-      dbus_message_unref(msg);
-   }
+		const char *const INTERFACE_NAME = "in.softprayog.dbus_example";
+		const char *const METHOD_NAME = "add_numbers";
+
+		// check this is a method call for the right interface and method
+		if (dbus_message_is_method_call(msg, INTERFACE_NAME, METHOD_NAME))
+         		reply_to_method_call(msg, conn);   //// Prepare reply to the method  /////////////////
+
+		// free the message
+      		dbus_message_unref(msg);
+	}
    
    ```
-After you have finished with the bus you should close the connection. Note that this is a shared connection to the bus so you probably only want to do this just before the application terminates.
+
+
+### Prepare reply to the method
+
 
 ```
-   dbus_connection_close(conn);
-  
+
+void reply_to_method_call(DBusMessage* msg, DBusConnection* conn)
+{
+
+	DBusMessage* reply;
+   	DBusMessageIter args;
+
+	char* param = "";
+	char message[200] = "Hi client; you have send : "; 
+	char *response_string;
+      
+
+	// read the arguments
+   	if (!dbus_message_iter_init(msg, &args))
+     		 fprintf(stderr, "Message has no arguments!\n");
+   
+	else if (DBUS_TYPE_STRING != dbus_message_iter_get_arg_type(&args))
+      		fprintf(stderr, "Argument is not string!\n");
+   	else
+		dbus_message_iter_get_basic(&args, &param);
+   		
+	printf("Method called with %s\n", param);
+
+        strcat(message, param);
+        response_string=message;
+
+	// create a reply from the message
+   	reply = dbus_message_new_method_return(msg);
+
+
+	// add the arguments to the reply
+   	dbus_message_iter_init_append(reply, &args);
+
+
+		
+        if (!dbus_message_iter_append_basic (&args, DBUS_TYPE_STRING, &response_string)) {
+                        fprintf (stderr, "Error in dbus_message_iter_append_basic\n");
+                        exit (1);
+                    }
+
+	 // send the reply && flush the connection
+   	if (!dbus_connection_send(conn, reply, NULL)) { 
+      		fprintf(stderr, "Out Of Memory!\n"); 
+      		exit(1);
+   	}
+   	
+	dbus_connection_flush(conn);
+
+	/// free the reply
+   	dbus_message_unref(reply);
+}
+
 ```
 
 REF:
