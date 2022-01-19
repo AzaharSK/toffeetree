@@ -43,7 +43,7 @@ int main (int argc, char **argv)
     if (!conn) 
         exit (1);
 
-    printf ("Please type two numbers: ");
+    puts("Type something : ");
     while (fgets (input, 78, stdin) != NULL) {
 
         // Get a well known name
@@ -118,7 +118,7 @@ int main (int argc, char **argv)
              exit (1);
         }
 
-        printf ("Please type two numbers: ");
+	puts("Type something : ");
     }
 
     return 0;
