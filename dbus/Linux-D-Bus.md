@@ -73,22 +73,88 @@ For simplicity I don't cope with the situation where someone already owns that n
 
 
 ```
+#include <dbus/dbus.h>
+
+
 DBusError dbus_error;
 DBusConnection *conn;
 int ret;
-   
-   // initialise the errors   
+```
+
+
+// initialise the errors   
+
+```
 dbus_error_init (&dbus_error);
 
+```
+
+
 // connect to the bus
+```
 conn = dbus_bus_get (DBUS_BUS_SESSION, &dbus_error);
 
  if (dbus_error_is_set (&dbus_error)) { 
-          fprintf(stderr, "Connection Error (%s)\n", err.message); 
+          fprintf(stderr, "Connection Error (%s)\n", dbus_error.message); 
           dbus_error_free(&dbus_error); 
  }
  if (!conn)
        { exit (1); }
-       
-       
-       ```
+ ```      
+
+ // Get a well known name
+```
+   const char *const SERVER_BUS_NAME = "in.softprayog.add_server";
+
+   ret = dbus_bus_request_name (conn, SERVER_BUS_NAME, DBUS_NAME_FLAG_DO_NOT_QUEUE, &dbus_error);
+
+    if (dbus_error_is_set (&dbus_error)) {
+          fprintf(stderr, "Connection Error (%s)\n", err.message); 
+          dbus_error_free(&dbus_error);
+          }
+
+    if (ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER) {
+        fprintf (stderr, "Dbus: not primary owner, ret = %d\n", ret);
+        exit (1);
+    }
+
+```
+
+//Exposing a Method to be called
+
+To expose a method which may be called by other DBUS applications you have to listen for messages as above,
+then when you get a method call corresponding to the method you exposed you parse out the parameters, 
+construct a reply message from the original and populate its parameters with the return value. 
+Finally you have to send and free the reply.
+
+```
+
+const char *const INTERFACE_NAME = "in.softprayog.dbus_example";
+const char *const METHOD_NAME = "add_numbers";
+
+// loop, testing for new messages : Handle request from clients
+
+   while (true) {
+ 
+      // non blocking read of the next available message
+      
+      dbus_connection_read_write(conn, 0);
+      DBusMessage *msg = dbus_connection_pop_message(conn);
+
+      // loop again if we haven't got a message
+      
+      if (NULL == msg) { 
+         sleep(1); 
+         continue; 
+      }
+
+      // check this is a method call for the right interface and method
+      
+      if (dbus_message_is_method_call(msg, INTERFACE_NAME, METHOD_NAME))
+         reply_to_method_call(msg, conn);
+
+      // free the message
+      dbus_message_unref(msg);
+   }
+   
+   ```
