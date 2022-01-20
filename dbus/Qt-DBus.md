@@ -91,6 +91,8 @@ class CalculatorInterfaceAdaptor: public QDBusAbstractAdaptor
 {
 
    // This class will have slavecalculator.xml content along with exposed method details , 
+   // It interact with Qt-DBus infrastructure <QtDbus> and dwon below to libdbus C API lib on linux
+   
    // It handles client invoked methods and input arguments as well as return value
    //    QMetaObject::invokeMethod(parent(), "divide", Q_RETURN_ARG(double, out0), Q_ARG(double, x), Q_ARG(double, y));
    //    QMetaObject::invokeMethod(parent(), "multiplay", Q_RETURN_ARG(double, out0), Q_ARG(double, x), Q_ARG(double, y));
