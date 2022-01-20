@@ -170,7 +170,9 @@ com::blikoon::CalculatorInterface* calcHandle = new com::blikoon::CalculatorInte
 
  if(calcHandle->isValid()) {
         
-        calcHandle->Service_MyMethod(arg1 , arg2, ....argN);  //Server Service
+       // calcHandle->Service_MyMethod(arg1 , arg2, ....argN);  //Server expossed Services Method
+        double result1=calcHandle->multiplay(1, 4);
+        double result2=calcHandle->divide(4, 2);
 }
 
 
